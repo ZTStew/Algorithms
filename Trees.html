@@ -1,0 +1,225 @@
+<html>
+<script>
+    /* Trees */
+    /* Description: */
+    /* Creates a tree object that will be used to contain all of the data */
+    class Tree{
+        constructor(){
+            this.root = null;
+        }
+
+        /* Creates add method to add values into the tree */
+        add(val){
+            if(isNaN(val)){
+                console.log("Non number entered");
+                return this;
+            }
+            if(!this.root){
+                console.log("Root has now been made.");
+                this.root = new Leaf(val);
+                return this;
+            }
+            function craw(worm){
+                if(!worm.left && worm.val >= val){
+                    worm.left = new Leaf(val);
+                    return worm;
+                } else if(!worm.right && worm.val < val){
+                    worm.right = new Leaf(val);
+                    return worm;
+                } else if(worm.val >= val){
+                    worm.left = craw(worm.left);
+                    return worm;
+                } else if(worm.val < val){
+                    worm.right = craw(worm.right);
+                    return worm;
+                }
+            }
+            craw(this.root);
+            return this;
+        }
+
+        /* A method that returns a fully sorted array to the user */
+        returnSorted(){
+            if(!this.root){
+                return "No Tree To Speak Of";
+            }
+            let arr = [];
+            function craw(worm, arr){
+                if(worm.left){
+                    arr = craw(worm.left, arr);
+                }
+                arr.push(worm.val);
+                if(worm.right){
+                    arr = craw(worm.right, arr);
+                }
+                return arr;
+            }
+            arr = craw(this.root, arr);
+            return arr;
+        }
+        
+        /* Removes one of a specified value from the tree */
+        removeOne(val, all = false){
+            let rmCheck = false;
+            if(!this.root){
+                if(all){
+                    return [this, rmCheck];
+                } else {
+                    return this;
+                }
+            }
+            /* If the value searched for is the root */
+            if(this.root.val === val){
+                if(this.root.right){
+                    function craw(worm){
+                        if(worm.left){
+                            craw(worm.left);
+                            return;
+                        }
+                        this.root.left = worm.left;
+                        this.root = this.root.right;
+                        rmCheck = true;
+                    }
+                    craw(this.root.right); 
+                } else {
+                    this.root = this.root.left;
+                    rmCheck = true;
+                    return this;
+                }
+                
+            }
+            function searchDestroy(worm){
+                function remove(worm, target, direction){
+                    // console.log(target);
+                    rmCheck = true;
+                    if(!target.left && !target.right){
+                        if(direction === "left"){
+                            worm.left = null;
+                        } else {
+                            worm.right = null;
+                        }
+                        return this;
+                    } else if(target.left && target.right){
+                        function findEnd(target, last = null){
+                            if(target.left){
+                                last = findEnd(target.left);
+                                return last;
+                            }
+                            last = target;
+                            return last;
+                        }
+                        let last = findEnd(target.right);
+                        last.left = target.left;
+                        if(direction === "left"){
+                            worm.left = target.right;
+                        } else {
+                            worm.right = target.right;
+                        }
+                        return this;
+                    } else if(target.left){
+                        if(direction === "left"){
+                            worm.left = target.left;
+                        } else {
+                            worm.right = target.left;
+                        }
+                        return this;
+                    } else if(target.right){
+                        if(direction === "left"){
+                            worm.left = target.right;
+                        } else {
+                            worm.right = target.right;
+                        }
+                        return this;
+                    }
+                    return;
+                }
+                if(worm.left && worm.left.val === val){
+                    remove(worm, worm.left, "left");
+                } else if(worm.right && worm.right.val === val){
+                    remove(worm, worm.right, "right");
+                } else if(worm.left && worm.val > val){
+                    // console.log(worm);
+                    searchDestroy(worm.left);
+                } else if(worm.right && worm.val < val){
+                    // console.log(worm);
+                    searchDestroy(worm.right);
+                }
+                return;
+            }
+            searchDestroy(this.root);
+            if(all){
+                if(rmCheck){
+                    return [this, rmCheck];
+                }
+                return [this, rmCheck];
+            } else {
+                return this;
+            }
+        }
+
+        /* Removes all of a specified value from the tree */
+        removeAll(val){
+            let returned = this.removeOne(val, true);
+            if(returned[1] === true){
+                this.removeAll(val);
+                return this;
+            }
+            return this;
+        }
+
+        /* Removes the Smallest value from the tree */
+        removeSmall(){
+            if(this.root.left == null){
+                this.root = this.root.right;
+                return this;
+            }
+            if(this.root){
+                function craw(worm){
+                    if(!worm.left.left && !worm.left.right){
+                        worm.left = undefined;
+                        return;
+                    }
+                    craw(worm.left);
+                }
+                craw(this.root);
+            }
+            return this;
+        }
+
+        /* Removes the Largest value from the tree  */
+        removeLarge(){
+            if(this.root.right == null){
+                this.root = this.root.left;
+                return this;
+            }
+            if(this.root){
+                function craw(worm){
+                    if(!worm.right.left && !worm.right.right){
+                        worm.right = undefined;
+                        return;
+                    }
+                    craw(worm.right);
+                }
+                craw(this.root);
+            }
+            return this;
+        }
+    }
+
+    /* Creates a leaf class that will act as a node and contain the node's value, the node to it's left (Smaller Values), and the node to it's right (Larger Values)*/
+    class Leaf{
+        constructor(val){
+            this.val = val;
+            this.left = null;
+            this.right = null;
+        }
+    }
+
+    tree = new Tree();
+    tree.add(12).add(4).add(7).add(6).add(3).add(2).add(9).add(10).add(5).add(7).add(18).add(15).add(22);
+    console.log(tree.returnSorted());
+    tree.removeAll(7);
+    console.log(tree.returnSorted());
+
+</script>
+</html>
